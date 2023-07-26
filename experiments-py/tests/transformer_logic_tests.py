@@ -34,7 +34,9 @@ def apply_softmax(W_prime: np.ndarray):
     #  if done correctly the sum of the columns for any row should be 1
     #  print(f"v_p3: {np.sum(v_p3, axis=1)}")
 
-    v_p1 = np.exp(W_prime)
+    v_p1 = np.exp(W_prime  / (np.sqrt(W_prime.shape[1])))
+
+    print(f"Scale {v_p1}")
     v_p2 = np.sum(v_p1, axis=1)
     v_p2 = v_p2.reshape((v_p2.shape[0], 1))  # create a column vector
 
@@ -85,9 +87,12 @@ def test_attention_logic():
 
     print(f"W => {W}")
 
-    from scipy.special import softmax
+    from scipy.special import softmax as softmax_sci
 
-    print(f"Scipy softmax: {softmax(W_prime, axis=1)}")
+    print(f"Scipy softmax: {softmax_sci(W_prime, axis=1)}")
+
+    print(f"Softmax: {softmax(W_prime)}")
+
 
 
 def perf_test():
@@ -101,14 +106,13 @@ def perf_test():
 
     loop = 5
 
-    result = timeit.timeit(lambda: perf_scipy_soft_max(x), number=loop)
+    result = timeit.timeit(lambda: softmax(x), number=loop)
     scipy_res = result / loop
     print(f"scipy: {scipy_res}")
 
     result = timeit.timeit(lambda: apply_softmax(x), number=loop)
-    our_max_res = result/loop
+    our_max_res = result / loop
     print(f"our_softmax: {float(our_max_res)}")
-
 
     if scipy_res < our_max_res:
         print(f"Scripy win {our_max_res - scipy_res}")
